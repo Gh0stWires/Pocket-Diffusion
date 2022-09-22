@@ -1,6 +1,5 @@
 package com.example.domain.api.repository
 
-import com.example.domain.api.models.JobResultDto
 import com.example.domain.api.models.PromptDto
 import javax.inject.Inject
 

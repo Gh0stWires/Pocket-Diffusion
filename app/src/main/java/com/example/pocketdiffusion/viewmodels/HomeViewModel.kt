@@ -21,12 +21,15 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     init {
-
     }
 
-    private val _uiState = MutableStateFlow<HomeStateUi>(HomeStateUi.Empty(HomeUiModel(false, "", null) {
-        sendPrompt(it)
-    }))
+    private val _uiState = MutableStateFlow<HomeStateUi>(
+        HomeStateUi.Empty(
+            HomeUiModel(false, "", null) {
+                sendPrompt(it)
+            }
+        )
+    )
     val uiState: StateFlow<HomeStateUi> = _uiState
 
     private fun sendPrompt(prompt: String) {
@@ -35,14 +38,16 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(coroutineDispatcherProvider.IO()) {
             try {
                 val response = repository.makeImage(prompt)
-                _uiState.value = HomeStateUi.Loaded(HomeUiModel(true, response.result, null) {
-                    checkStatus()
-                })
+                _uiState.value = HomeStateUi.Loaded(
+                    HomeUiModel(true, response.result, null) {
+                        checkStatus()
+                    }
+                )
             } catch (ex: Exception) {
                 if (ex is HttpException) {
-                    //TODO
+                    // TODO
                 } else {
-                    //TODO
+                    // TODO
                 }
             }
         }
@@ -52,27 +57,31 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(coroutineDispatcherProvider.IO()) {
             try {
                 val response = repository.statusCheck()
-                _uiState.value = HomeStateUi.Loaded(HomeUiModel(true, response.status, null) {
-                    if (response.status == "done") {
-                        getLatestImage()
-                    } else {
-                        checkStatus()
+                _uiState.value = HomeStateUi.Loaded(
+                    HomeUiModel(true, response.status, null) {
+                        if (response.status == "done") {
+                            getLatestImage()
+                        } else {
+                            checkStatus()
+                        }
                     }
-                })
+                )
             } catch (ex: Exception) {
                 if (ex is HttpException) {
-                    //TODO
+                    // TODO
                 } else {
-                    //TODO
+                    // TODO
                 }
             }
         }
     }
 
     private fun restartState() {
-        _uiState.value = HomeStateUi.Empty(HomeUiModel(false, "", null) {
-            sendPrompt(it)
-        })
+        _uiState.value = HomeStateUi.Empty(
+            HomeUiModel(false, "", null) {
+                sendPrompt(it)
+            }
+        )
     }
 
     private fun getLatestImage() {
@@ -81,17 +90,18 @@ class HomeViewModel @Inject constructor(
             try {
                 val response = repository.getLatest()
 
-                    // display the image data in a ImageView or save it
+                // display the image data in a ImageView or save it
                 val bmp = BitmapFactory.decodeStream(response.byteStream())
-                _uiState.value = HomeStateUi.LoadedImage(HomeUiModel(true, "", bmp) {
-                    restartState()
-                })
-
+                _uiState.value = HomeStateUi.LoadedImage(
+                    HomeUiModel(true, "", bmp) {
+                        restartState()
+                    }
+                )
             } catch (ex: Exception) {
                 if (ex is HttpException) {
-                    //TODO
+                    // TODO
                 } else {
-                    //TODO
+                    // TODO
                 }
             }
         }

@@ -6,7 +6,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -36,8 +37,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
@@ -45,7 +45,7 @@ fun MainScreen() {
         topBar = { TopBar() },
         content = {
             NavigationGraph(navController = navController, it)
-                  },
+        },
         bottomBar = { BottomNavigationBar(navController = navController) }
     )
 }

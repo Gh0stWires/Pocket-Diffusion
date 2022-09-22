@@ -30,9 +30,11 @@ class AppModule {
             .connectTimeout(NETWORK_REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .readTimeout(NETWORK_REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .writeTimeout(NETWORK_REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-            .addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            })
+            .addInterceptor(
+                HttpLoggingInterceptor().apply {
+                    level = HttpLoggingInterceptor.Level.BODY
+                }
+            )
             .build()
 
     @Provides
@@ -42,5 +44,4 @@ class AppModule {
         const val NETWORK_REQUEST_TIMEOUT_SECONDS = 15L
         const val BASE_URL = "https://f017-45-22-247-67.ngrok.io"
     }
-
 }

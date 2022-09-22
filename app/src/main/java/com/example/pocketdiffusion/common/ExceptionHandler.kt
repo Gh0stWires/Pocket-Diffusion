@@ -13,5 +13,4 @@ internal object ExceptionHandler {
             else -> androidx.compose.ui.R.string.default_error_message
         }
     }
-
 }
