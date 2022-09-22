@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_check_internet_connection">check your connection to your local flask server</string>
+</resources>
