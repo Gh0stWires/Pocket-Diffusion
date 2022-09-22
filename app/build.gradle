@@ -4,6 +4,8 @@ plugins {
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
     id "org.jlleitschuh.gradle.ktlint" version "11.0.0"
+    id 'com.google.firebase.appdistribution'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -25,10 +27,29 @@ android {
 
     buildTypes {
         release {
+            firebaseAppDistribution {
+                serviceCredentialsFile="./app/google-services.json"
+                artifactType = "APK"
+                groups = "hellfire-club"
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    flavorDimensions "version"
+    productFlavors {
+        demo {
+            dimension "version"
+            firebaseAppDistribution {
+                releaseNotes = "Release notes for demo version"
+                groups = "hellfire-club"
+            }
+        }
+    }
+
+
+
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
