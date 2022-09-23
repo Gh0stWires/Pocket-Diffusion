@@ -25,27 +25,14 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11
+    
+  
     - name: build release 
       run: ./gradlew assembleRelease
-    
-      
     - name: upload artifact to Firebase App Distribution
       uses: wzieba/Firebase-Distribution-Github-Action@v1
-    - name: Fetch credential file from secrets
-      id: fetch_credential_file
-      uses: timheuer/base64-to-file@v1
       with:
-          encodedString: ${{ secrets.CREDENTIAL_FILE }}
-          fileName: 'credential_file.json'
-    - name: Move credential file to repository location
-      run: mv ${{ steps.fetch_credential_file.outputs.filePath }} /home/runner/work/Firebase-Distribution-Github-Action/Firebase-Distribution-Github-Action/
-    - name: login 
-      run: firebase login
-    - name: Upload artifact to Firebase Distribution using credential file
-      with:
-          appId: ${{secrets.FIREBASE_APP_ID}}
-          groups: Testers
-          releaseNotesFile: README.md
-          file: ApiDemos-debug.apk
-          debug: true
-          serviceCredentialsFile: credential_file.json
+        appId: ${{secrets.FIREBASE_APP_ID}}
+        token: ${{secrets.FIREBASE_TOKEN}}
+        groups: testers
+        file: app/build/outputs/apk/release/app-release-unsigned.apk
