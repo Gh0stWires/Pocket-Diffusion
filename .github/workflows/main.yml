@@ -15,30 +15,15 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  builds:
+  run:
     runs-on: ubuntu-latest
-    steps: 
+    steps:
       - name: Checkout
-        uses: actions/checkout@v2
-        
-      - name: Setup Java JDK
-        uses: actions/setup-java@v1
-        with:
-         java-version: 11
-        
-      - name: Build Gradle
-        run: ./gradlew build
-    
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: app
-          path: app/build/outputs/apk/debug/app-debug.apk
-          
+        uses: actions/checkout@master
       - name: Upload artifact to Firebase Distribution
         uses: ./
         with:
-          appId: ${{secrets.FIREBASE_APP_ID}}
+          appId: ${{secrets.FIREBASE_ID}}
           token: ${{secrets.FIREBASE_TOKEN}}
           groups: hellfire-club
           file: ApiDemos-debug.apk
