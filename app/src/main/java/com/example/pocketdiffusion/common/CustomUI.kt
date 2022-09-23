@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.pocketdiffusion.R
 import com.example.pocketdiffusion.navigation.BottomNavItem
+import com.example.pocketdiffusion.ui.theme.Pink40
 import com.example.pocketdiffusion.ui.theme.Pink80
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,7 +51,7 @@ fun CustomTextField(
         label = { Text(title) },
         modifier = Modifier.padding(10.dp),
         textStyle = TextStyle(
-            color = Pink80,
+            color = Pink40,
             fontWeight = FontWeight.Bold,
             fontSize = 30.sp
         )
