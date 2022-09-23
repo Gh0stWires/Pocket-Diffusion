@@ -38,8 +38,8 @@ jobs:
       - name: Upload Artifact To Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
-          appId: ${{ secrets.FIREBASE_ID }}
-          token: ${{ secrets.FIREBASE_TOKEN }}
+          appId: ${{ ci.FIREBASE_ID }}
+          token: ${{ ci.FIREBASE_TOKEN }}
           groups: hellfire-club
           releaseNotes: "Hey! This my first integrate Firebase distributions with Github Actions"
           file: app/build/outputs/apk/debug/app-debug.apk
