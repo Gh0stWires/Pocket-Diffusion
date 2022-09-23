@@ -27,6 +27,8 @@ jobs:
         java-version: 11
     - name: build release 
       run: ./gradlew assembleRelease
+    
+      
     - name: upload artifact to Firebase App Distribution
       uses: wzieba/Firebase-Distribution-Github-Action@v1
     - name: Fetch credential file from secrets
@@ -37,8 +39,9 @@ jobs:
           fileName: 'credential_file.json'
     - name: Move credential file to repository location
       run: mv ${{ steps.fetch_credential_file.outputs.filePath }} /home/runner/work/Firebase-Distribution-Github-Action/Firebase-Distribution-Github-Action/
+    - name: login 
+      run: firebase login
     - name: Upload artifact to Firebase Distribution using credential file
-      uses: ./
       with:
           appId: ${{secrets.FIREBASE_APP_ID}}
           groups: Testers
