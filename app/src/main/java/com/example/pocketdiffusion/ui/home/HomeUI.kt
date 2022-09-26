@@ -1,21 +1,10 @@
 package com.example.pocketdiffusion.ui.home
 
-import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
-import android.net.Uri
-import android.provider.MediaStore
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -45,11 +34,13 @@ import com.example.pocketdiffusion.ui.theme.PocketDiffusionTheme
 import com.example.pocketdiffusion.viewmodels.HomeViewModel
 import com.example.pocketdiffusion.viewmodels.uimodels.HomeStateUi
 import com.example.pocketdiffusion.viewmodels.uimodels.HomeUiModel
-import java.io.ByteArrayOutputStream
 
 @Composable
-fun Home(homeViewModel: HomeViewModel = viewModel(), navController: NavHostController?, paddingValues: PaddingValues) {
-    val scroll = rememberScrollState(0)
+fun Home(
+    homeViewModel: HomeViewModel = viewModel(),
+    navController: NavHostController?,
+    paddingValues: PaddingValues
+) {
     val heightInPx = with(LocalDensity.current) {
         LocalConfiguration.current
             .screenHeightDp.dp.toPx()
@@ -83,127 +74,64 @@ fun Home(homeViewModel: HomeViewModel = viewModel(), navController: NavHostContr
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun LoadedScreen(data: HomeUiModel) {
-    AnimatedVisibility(
-        visible = data.promptSent,
-        enter = fadeIn(),
-        exit = fadeOut()
+    Column(
+        Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            Modifier
-                .animateEnterExit(
-                    // Slide in/out the inner box.
-                    enter = slideInVertically(),
-                    exit = slideOutVertically()
-                )
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Text(text = data.prompt ?: "")
+        ElevatedButton(
+            onClick = { data.function("") }
         ) {
-            Text(text = data.prompt ?: "")
-            ElevatedButton(
-                onClick = { data.function("") }
-            ) {
-                Text(text = if (data.prompt == "RUNNING") "Check Image Status" else "Get Latest Image")
-            }
+            Text(text = if (data.prompt == "RUNNING") "Check Image Status" else "Get Latest Image")
         }
     }
 }
 
-private fun shareBitmap(bitmap: Bitmap, fileName: String, context: Context) {
-    try {
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        intent.putExtra(Intent.EXTRA_STREAM, getImageUri(context, bitmap))
-        intent.type = "image/png"
-        context.startActivity(intent)
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-}
-
-fun getImageUri(inContext: Context, inImage: Bitmap): Uri? {
-    val bytes = ByteArrayOutputStream()
-    inImage.compress(Bitmap.CompressFormat.PNG, 100, bytes)
-    val path: String =
-        MediaStore.Images.Media.insertImage(inContext.contentResolver, inImage, "Title", null)
-    return Uri.parse(path)
-}
-
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun LatestImageScreen(data: HomeUiModel) {
     val context = LocalContext.current
-    AnimatedVisibility(
-        visible = data.promptSent,
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        Column(
-            Modifier
-                .animateEnterExit(
-                    // Slide in/out the inner box.
-                    enter = slideInVertically(),
-                    exit = slideOutVertically()
-                )
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+    Column(
+        Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
 
+    ) {
+        BitmapImage(
+            bitmap = (data.bitmap ?: painterResource(R.drawable.error)) as Bitmap, context
+        )
+        ElevatedButton(
+            onClick = { data.function(data.prompt ?: "") }
         ) {
-            BitmapImage(bitmap = (data.bitmap ?: painterResource(R.drawable.error)) as Bitmap)
-            Row() {
-                ElevatedButton(
-                    onClick = { data.function(data.prompt ?: "") }
-                ) {
-                    Text(text = "Start another Image")
-                }
-                ElevatedButton(
-                    onClick = {
-                        data.bitmap?.let { shareBitmap(it, "temp", context) }
-                    }
-                ) {
-                    Text(text = "Share")
-                }
-            }
+            Text(text = "Start another Image")
         }
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun EmptyScreen(data: HomeUiModel) {
     val onPromptChanged = { text: String ->
         data.prompt = text
     }
 
-    AnimatedVisibility(
-        visible = !data.promptSent,
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        Column(
-            Modifier
-                .animateEnterExit(
-                    // Slide in/out the inner box.
-                    enter = slideInVertically(),
-                    exit = slideOutVertically()
-                )
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+    Column(
+        Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
 
+    ) {
+        CustomTextField(
+            title = "What wonders will you make?",
+            textState = data.prompt ?: "",
+            onTextChange = onPromptChanged
+        )
+        ElevatedButton(
+            modifier = Modifier.padding(44.dp),
+            onClick = { data.function(data.prompt ?: "") }
         ) {
-            CustomTextField(
-                title = "What wonders will you make?",
-                textState = data.prompt ?: "",
-                onTextChange = onPromptChanged
-            )
-            ElevatedButton(
-                modifier = Modifier.padding(44.dp),
-                onClick = { data.function(data.prompt ?: "") }
-            ) {
-                Text(text = "Start Stable Diffusion Job")
-            }
+            Text(text = "Start Stable Diffusion Job")
         }
     }
 }

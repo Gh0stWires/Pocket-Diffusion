@@ -1,7 +1,10 @@
 package com.example.pocketdiffusion.common
 
+import android.content.Context
 import android.graphics.Bitmap
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -59,16 +62,21 @@ fun CustomTextField(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun BitmapImage(bitmap: Bitmap) {
+fun BitmapImage(bitmap: Bitmap, context: Context) {
     Image(
-        modifier = Modifier.height(512.dp).width(512.dp),
+        modifier = Modifier.height(512.dp).width(512.dp).combinedClickable(
+            onClick = { },
+            onLongClick = {
+                context.shareImage("generated_Image", bitmap, "pocket_diffusion_generated")
+            },
+        ),
         bitmap = bitmap.asImageBitmap(),
         contentDescription = "Generated Image",
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomNavigationBar(navController: NavController) {
     val items = listOf(
