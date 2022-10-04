@@ -29,6 +29,7 @@ import androidx.navigation.NavHostController
 import com.example.pocketdiffusion.R
 import com.example.pocketdiffusion.common.BitmapImage
 import com.example.pocketdiffusion.common.CustomTextField
+import com.example.pocketdiffusion.navigation.NavRoutes
 import com.example.pocketdiffusion.ui.theme.Pink80
 import com.example.pocketdiffusion.ui.theme.PocketDiffusionTheme
 import com.example.pocketdiffusion.viewmodels.HomeViewModel
@@ -38,7 +39,7 @@ import com.example.pocketdiffusion.viewmodels.uimodels.HomeUiModel
 @Composable
 fun Home(
     homeViewModel: HomeViewModel = viewModel(),
-    navController: NavHostController?,
+    navController: NavHostController,
     paddingValues: PaddingValues
 ) {
     val heightInPx = with(LocalDensity.current) {
@@ -70,6 +71,11 @@ fun Home(
             is HomeStateUi.Error -> {} // ErrorDialog(state.message)
             is HomeStateUi.Loaded -> LoadedScreen(state.data)
             is HomeStateUi.LoadedImage -> LatestImageScreen(state.data)
+            is HomeStateUi.ShouldLogOut -> {
+                navController.navigate(NavRoutes.Auth.route) {
+                    this.launchSingleTop = true
+                }
+            }
         }
     }
 }

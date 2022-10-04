@@ -2,4 +2,5 @@
     <string name="app_name">Pocket Diffusion</string>
     <string name="error_oops_error_occured">Something went wrong</string>
     <string name="error_check_internet_connection">check your connection to your local flask server</string>
+    <string name="problem_occurred">Problem Occured</string>
 </resources>

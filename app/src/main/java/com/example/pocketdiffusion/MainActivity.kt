@@ -5,24 +5,23 @@ package com.example.pocketdiffusion
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.pocketdiffusion.common.BottomNavigationBar
 import com.example.pocketdiffusion.common.TopBar
-import com.example.pocketdiffusion.navigation.BottomNavItem
 import com.example.pocketdiffusion.navigation.NavRoutes
 import com.example.pocketdiffusion.ui.home.Home
+import com.example.pocketdiffusion.ui.login.LoginPage
 import com.example.pocketdiffusion.ui.settings.Settings
 import com.example.pocketdiffusion.ui.theme.PocketDiffusionTheme
 import com.example.pocketdiffusion.viewmodels.HomeViewModel
+import com.example.pocketdiffusion.viewmodels.LoginViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -41,23 +40,37 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-    Scaffold(
-        topBar = { TopBar() },
-        content = {
-            NavigationGraph(navController = navController, it)
-        },
-        bottomBar = { BottomNavigationBar(navController = navController) }
-    )
-}
+    NavHost(navController, startDestination = NavRoutes.Auth.route) {
 
-@Composable
-fun NavigationGraph(navController: NavHostController, paddingValues: PaddingValues) {
-    NavHost(navController, startDestination = BottomNavItem.Home.screen_route) {
+        composable(route = NavRoutes.Auth.route, content = {
+            Scaffold(
+                topBar = { TopBar() },
+                content = {
+                    val viewModel = hiltViewModel<LoginViewModel>()
+                    LoginPage(
+                        navController = navController,
+                        loginViewModel = viewModel,
+                        paddingValues = it
+                    )
+                }
+            )
+        })
+
         composable(NavRoutes.Home.route) {
-            val viewModel = hiltViewModel<HomeViewModel>()
-            Home(navController = navController, homeViewModel = viewModel, paddingValues = paddingValues)
+            Scaffold(
+                topBar = { TopBar() },
+                bottomBar = {
+                    BottomNavigationBar(navController = navController)
+                },
+            ) {
+                val viewModel = hiltViewModel<HomeViewModel>()
+                Home(
+                    navController = navController,
+                    homeViewModel = viewModel,
+                    paddingValues = it
+                )
+            }
         }
-
         composable(NavRoutes.Settings.route) {
             Settings(navController = navController)
         }
@@ -68,6 +81,6 @@ fun NavigationGraph(navController: NavHostController, paddingValues: PaddingValu
 @Composable
 fun DefaultPreview() {
     PocketDiffusionTheme {
-        MainScreen()
+        // MainScreen()
     }
 }

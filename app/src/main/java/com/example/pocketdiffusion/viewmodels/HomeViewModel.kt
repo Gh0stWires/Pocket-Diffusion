@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.api.CoroutineDispatcherProvider
 import com.example.domain.api.repository.LocalRepo
+import com.example.pocketdiffusion.prefs.AuthPreferenceManager
 import com.example.pocketdiffusion.viewmodels.uimodels.HomeStateUi
 import com.example.pocketdiffusion.viewmodels.uimodels.HomeUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: LocalRepo,
-    private val coroutineDispatcherProvider: CoroutineDispatcherProvider
+    private val coroutineDispatcherProvider: CoroutineDispatcherProvider,
+    private val authPreferenceManager: AuthPreferenceManager
 ) : ViewModel() {
 
     init {
@@ -37,12 +39,22 @@ class HomeViewModel @Inject constructor(
 
         viewModelScope.launch(coroutineDispatcherProvider.IO()) {
             try {
-                val response = repository.makeImage(prompt)
-                _uiState.value = HomeStateUi.Loaded(
-                    HomeUiModel(true, response.result, null) {
-                        checkStatus()
-                    }
-                )
+                val token = authPreferenceManager.apiToken
+                val response = repository.makeImage(prompt, token)
+                if (response.message == "Invalid token provided.") {
+                    authPreferenceManager.apiToken = ""
+                    _uiState.value = HomeStateUi.ShouldLogOut(
+                        HomeUiModel(false, "", null) {
+                            sendPrompt(it)
+                        }
+                    )
+                } else {
+                    _uiState.value = HomeStateUi.Loaded(
+                        HomeUiModel(true, response.result, null) {
+                            checkStatus()
+                        }
+                    )
+                }
             } catch (ex: Exception) {
                 if (ex is HttpException) {
                     // TODO
@@ -56,7 +68,7 @@ class HomeViewModel @Inject constructor(
     private fun checkStatus() {
         viewModelScope.launch(coroutineDispatcherProvider.IO()) {
             try {
-                val response = repository.statusCheck()
+                val response = repository.statusCheck(authPreferenceManager.apiToken)
                 _uiState.value = HomeStateUi.Loaded(
                     HomeUiModel(true, response.status, null) {
                         if (response.status == "done") {
@@ -88,7 +100,7 @@ class HomeViewModel @Inject constructor(
         _uiState.value = HomeStateUi.Loading
         viewModelScope.launch(coroutineDispatcherProvider.IO()) {
             try {
-                val response = repository.getLatest()
+                val response = repository.getLatest(authPreferenceManager.apiToken)
 
                 // display the image data in a ImageView or save it
                 val bmp = BitmapFactory.decodeStream(response.byteStream())

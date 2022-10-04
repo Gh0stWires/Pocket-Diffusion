@@ -1,10 +1,13 @@
 package com.example.pocketdiffusion.di
 
+import android.content.Context
 import com.example.domain.api.CoroutineDispatcherProvider
 import com.example.domain.api.repository.LocalService
+import com.example.pocketdiffusion.prefs.AuthPreferenceManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -39,6 +42,13 @@ class AppModule {
 
     @Provides
     fun provideCoroutineDispatcher() = CoroutineDispatcherProvider()
+
+    @Provides
+    fun provideAuthPrefManager(@ApplicationContext context: Context): AuthPreferenceManager {
+        return AuthPreferenceManager(
+            context
+        )
+    }
 
     companion object {
         const val NETWORK_REQUEST_TIMEOUT_SECONDS = 15L
