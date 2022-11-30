@@ -29,6 +29,7 @@ import androidx.navigation.NavHostController
 import com.example.pocketdiffusion.R
 import com.example.pocketdiffusion.common.BitmapImage
 import com.example.pocketdiffusion.common.CustomTextField
+import com.example.pocketdiffusion.common.Loader
 import com.example.pocketdiffusion.navigation.NavRoutes
 import com.example.pocketdiffusion.ui.theme.Pink80
 import com.example.pocketdiffusion.ui.theme.PocketDiffusionTheme
@@ -56,6 +57,7 @@ fun Home(
                 )
             )
             .padding(paddingValues = paddingValues)
+            .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
         when (val state = homeViewModel.uiState.collectAsState().value) {
@@ -69,7 +71,7 @@ fun Home(
                     CircularProgressIndicator()
                 }
             is HomeStateUi.Error -> {} // ErrorDialog(state.message)
-            is HomeStateUi.Loaded -> LoadedScreen(state.data)
+            is HomeStateUi.Loaded -> Loader()
             is HomeStateUi.LoadedImage -> LatestImageScreen(state.data)
             is HomeStateUi.ShouldLogOut -> {
                 navController.navigate(NavRoutes.Auth.route) {

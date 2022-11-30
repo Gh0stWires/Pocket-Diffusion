@@ -52,6 +52,6 @@ class AppModule {
 
     companion object {
         const val NETWORK_REQUEST_TIMEOUT_SECONDS = 15L
-        const val BASE_URL = "https://b903-45-22-247-67.ngrok.io"
+        const val BASE_URL = "https://45d8-45-22-247-67.ngrok.io"
     }
 }

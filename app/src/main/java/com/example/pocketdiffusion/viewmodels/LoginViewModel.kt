@@ -119,16 +119,20 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch(coroutineDispatcherProvider.IO()) {
             try {
                 val response = repository.login(email, password)
-                authPreferenceManager.apiToken = response.token ?: ""
-                _uiState.value = LoginUiState.LoggedIn(
-                    LoginUiModel(
-                        "",
-                        "",
-                        function = { _, _ ->
-                        }, toggleState = {
-                    }
+                if (response.message == null) {
+                    authPreferenceManager.apiToken = response.token ?: ""
+                    _uiState.value = LoginUiState.LoggedIn(
+                        LoginUiModel(
+                            "",
+                            "",
+                            function = { _, _ ->
+                            }, toggleState = {
+                            }
+                        )
                     )
-                )
+                } else {
+                    _uiState.value = LoginUiState.Error(message = response.message ?: "")
+                }
             } catch (ex: Exception) {
                 if (ex is HttpException) {
                     // TODO

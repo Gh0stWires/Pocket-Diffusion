@@ -6,6 +6,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -39,10 +42,15 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.pocketdiffusion.R
 import com.example.pocketdiffusion.navigation.NavRoutes
 import com.example.pocketdiffusion.ui.theme.Pink40
 import com.example.pocketdiffusion.ui.theme.Pink80
+import com.example.pocketdiffusion.ui.theme.PocketDiffusionTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -153,48 +161,56 @@ fun BottomNavigationBar(navController: NavController) {
 }
 
 @Composable
+fun Loader() {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.pink_loader))
+    LottieAnimation(modifier = Modifier.fillMaxSize(), composition = composition, iterations = LottieConstants.IterateForever )
+}
+
+@Composable
 fun ErrorDialog(message: String, setState: () -> Unit) {
-    Column {
-        val openDialog = remember { mutableStateOf(true) }
+    PocketDiffusionTheme {
+        Column {
+            val openDialog = remember { mutableStateOf(true) }
 
-        if (openDialog.value) {
+            if (openDialog.value) {
 
-            AlertDialog(
-                onDismissRequest = {
-                    // Dismiss the dialog when the user clicks outside the dialog or on the back
-                    // button. If you want to disable that functionality, simply use an empty
-                    // onCloseRequest.
-                    openDialog.value = false
-                },
-                title = {
-                    Text(text = "Error")
-                },
-                text = {
-                    Text(message)
-                },
-                confirmButton = {
-                    Button(
+                AlertDialog(
+                    onDismissRequest = {
+                        // Dismiss the dialog when the user clicks outside the dialog or on the back
+                        // button. If you want to disable that functionality, simply use an empty
+                        // onCloseRequest.
+                        openDialog.value = false
+                    },
+                    title = {
+                        Text(text = "Error")
+                    },
+                    text = {
+                        Text(message)
+                    },
+                    confirmButton = {
+                        Button(
 
-                        onClick = {
-                            setState()
-                            openDialog.value = false
+                            onClick = {
+                                setState()
+                                openDialog.value = false
+                            }
+                        ) {
+                            Text("Try again")
                         }
-                    ) {
-                        Text("Try again")
-                    }
-                },
-                dismissButton = {
-                    Button(
+                    },
+                    dismissButton = {
+                        Button(
 
-                        onClick = {
-                            setState()
-                            openDialog.value = false
+                            onClick = {
+                                setState()
+                                openDialog.value = false
+                            }
+                        ) {
+                            Text("Dismiss")
                         }
-                    ) {
-                        Text("Dismiss")
                     }
-                }
-            )
+                )
+            }
         }
     }
 }

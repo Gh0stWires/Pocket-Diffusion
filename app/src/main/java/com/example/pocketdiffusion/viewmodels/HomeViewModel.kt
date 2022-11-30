@@ -1,6 +1,7 @@
 package com.example.pocketdiffusion.viewmodels
 
 import android.graphics.BitmapFactory
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.api.CoroutineDispatcherProvider
@@ -9,10 +10,17 @@ import com.example.pocketdiffusion.prefs.AuthPreferenceManager
 import com.example.pocketdiffusion.viewmodels.uimodels.HomeStateUi
 import com.example.pocketdiffusion.viewmodels.uimodels.HomeUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import retrofit2.HttpException
+import java.io.IOException
+import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,6 +29,9 @@ class HomeViewModel @Inject constructor(
     private val coroutineDispatcherProvider: CoroutineDispatcherProvider,
     private val authPreferenceManager: AuthPreferenceManager
 ) : ViewModel() {
+
+    private val pollJobs = CopyOnWriteArrayList<Job>()
+    private val shouldContinuePoll = MutableLiveData<Boolean>(true)
 
     init {
     }
@@ -49,6 +60,8 @@ class HomeViewModel @Inject constructor(
                         }
                     )
                 } else {
+                    startPoll()
+                    shouldContinuePoll.postValue(true)
                     _uiState.value = HomeStateUi.Loaded(
                         HomeUiModel(true, response.result, null) {
                             checkStatus()
@@ -69,15 +82,12 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(coroutineDispatcherProvider.IO()) {
             try {
                 val response = repository.statusCheck(authPreferenceManager.apiToken)
-                _uiState.value = HomeStateUi.Loaded(
-                    HomeUiModel(true, response.status, null) {
-                        if (response.status == "done") {
-                            getLatestImage()
-                        } else {
-                            checkStatus()
-                        }
-                    }
-                )
+
+                if (response.status == "done") {
+                    getLatestImage()
+                } else if (response.status == null) {
+                    shouldContinuePoll.postValue(false)
+                }
             } catch (ex: Exception) {
                 if (ex is HttpException) {
                     // TODO
@@ -97,7 +107,6 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun getLatestImage() {
-        _uiState.value = HomeStateUi.Loading
         viewModelScope.launch(coroutineDispatcherProvider.IO()) {
             try {
                 val response = repository.getLatest(authPreferenceManager.apiToken)
@@ -115,6 +124,38 @@ class HomeViewModel @Inject constructor(
                 } else {
                     // TODO
                 }
+            }
+        }
+    }
+
+    private fun startPoll() = viewModelScope.launch(coroutineDispatcherProvider.IO()) {
+        try {
+            poll {
+                //fetch data from server
+                checkStatus()
+            }
+        } catch (e: Exception) {
+            //ignore
+        }
+    }.also {
+        track(it)
+    }
+
+    private fun track(job: Job) {
+        pollJobs.add(job)
+        job.invokeOnCompletion {
+            pollJobs.remove(job)
+        }
+    }
+
+    private suspend fun poll(block: suspend () -> Unit) {
+        while (shouldContinuePoll.value == true) {
+            try {
+                block()
+                delay(30000)
+                yield()
+            } catch (e: CancellationException) {
+                break
             }
         }
     }
